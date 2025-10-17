@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WormGPT Advanced Interface</title>
+    <title>WormGPT Fluent Interface</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,11 +24,7 @@
             --glow-color: rgba(255, 0, 0, 0.5);
         }
 
-        html, body {
-            height: 100%;
-            margin: 0;
-            overflow: hidden; /* Prevent body scroll on mobile */
-        }
+        html, body { height: 100%; margin: 0; overflow: hidden; }
 
         body {
             font-family: 'Fira Code', monospace;
@@ -37,28 +33,40 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            text-rendering: optimizeLegibility;
         }
 
-        #chat-wrapper {
-            width: 90%;
-            max-width: 800px;
-            height: 95%;
-            max-height: 850px;
-            text-align: center;
+        #chat-wrapper { width: 90%; max-width: 800px; height: 95%; max-height: 850px; }
+
+        .chat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
         }
 
         #title {
             font-size: 2.5em;
             color: var(--primary-red);
             text-shadow: 0 0 10px var(--glow-color);
-            margin-bottom: 20px;
             font-weight: 700;
+            margin: 0;
         }
+
+        #clear-button {
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: all 0.2s ease;
+        }
+        #clear-button:hover { border-color: var(--primary-red); color: var(--primary-red); }
 
         #chat-container {
             width: 100%;
-            height: 100%;
+            height: calc(100% - 60px);
             background-color: var(--container-bg-color);
             box-shadow: 0 0 20px var(--glow-color);
             border-radius: 8px;
@@ -66,16 +74,10 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            position: relative;
         }
 
-        #chat-box {
-            flex-grow: 1;
-            padding: 20px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
+        #chat-box { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; }
         
         #chat-box::-webkit-scrollbar { width: 8px; }
         #chat-box::-webkit-scrollbar-track { background: var(--container-bg-color); }
@@ -88,175 +90,74 @@
             line-height: 1.7;
             word-wrap: break-word;
             position: relative;
+            animation: message-enter 0.3s ease-out;
         }
+        @keyframes message-enter { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .user-message {
-            background-color: #333;
-            color: var(--text-color);
-            align-self: flex-end;
-            border-right: 3px solid var(--primary-red);
-        }
+        .user-message { background-color: #333; color: var(--text-color); align-self: flex-end; border-right: 3px solid var(--primary-red); }
+        .assistant-message, .system-message { background-color: #222; color: var(--text-color); align-self: flex-start; border-left: 3px solid var(--primary-red); text-align: right; }
+        .system-message { border-color: #f39c12; color: #f39c12; font-weight: bold; }
 
-        .assistant-message, .system-message {
-            background-color: #222;
-            color: var(--text-color);
-            align-self: flex-start;
-            border-left: 3px solid var(--primary-red);
-            text-align: right;
-        }
-        .system-message {
-            border-color: #f39c12; /* A different color for system alerts */
-            color: #f39c12;
-            font-weight: bold;
-        }
-
-        .copy-button {
+        .copy-button, .copy-code-button {
             position: absolute;
-            top: 8px;
-            left: 8px;
-            background: #444;
-            border: 1px solid #666;
-            color: #eee;
-            padding: 4px 8px;
-            border-radius: 5px;
-            cursor: pointer;
-            opacity: 0;
-            transition: opacity 0.2s;
-            font-size: 12px;
+            background: #444; border: 1px solid #666; color: #eee;
+            padding: 4px 8px; border-radius: 5px; cursor: pointer;
+            opacity: 0; transition: opacity 0.2s; font-size: 12px;
         }
-        .assistant-message:hover .copy-button {
-            opacity: 1;
-        }
+        .copy-button { top: 8px; left: 8px; }
+        .assistant-message:hover .copy-button { opacity: 1; }
         .copy-button:hover { background: #555; }
+        
+        .assistant-message pre { position: relative; }
+        .copy-code-button { top: 8px; left: 8px; }
+        .assistant-message pre:hover .copy-code-button { opacity: 1; }
+        
+        .assistant-message pre { background-color: #0f0f0f; border: 1px solid var(--border-color); border-radius: 5px; padding: 15px; overflow-x: auto; text-align: left; direction: ltr; }
+        .assistant-message code { font-family: 'Fira Code', monospace; font-size: 0.95em; }
+        .assistant-message p:last-child { margin-bottom: 0; }
 
-        .assistant-message pre {
-            background-color: #0f0f0f;
-            border: 1px solid var(--border-color);
-            border-radius: 5px;
-            padding: 15px;
-            overflow-x: auto;
-            text-align: left;
-            direction: ltr;
-        }
-        .assistant-message code {
-            font-family: 'Fira Code', monospace;
-            font-size: 0.95em;
-        }
+        #input-area { display: flex; padding: 15px; border-top: 1px solid var(--border-color); background-color: #101010; gap: 10px; }
+        #message-input { flex-grow: 1; padding: 12px; border: 1px solid var(--border-color); border-radius: 5px; background-color: #252525; color: var(--text-color); font-family: 'Fira Code', monospace; font-size: 1rem; resize: none; overflow-y: hidden; }
+        #message-input:focus { outline: none; border-color: var(--primary-red); box-shadow: 0 0 8px var(--glow-color); }
+        #message-input:disabled { background-color: #333; cursor: not-allowed; }
+        
+        #input-helper { font-size: 0.8em; color: #888; margin-top: -10px; padding: 0 15px 5px; text-align: left; }
 
-        .loading-dots span {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background-color: var(--primary-red);
-            margin: 0 2px;
-            animation: bounce 1.4s infinite ease-in-out both;
-        }
-        .loading-dots span:nth-child(1) { animation-delay: -0.32s; }
-        .loading-dots span:nth-child(2) { animation-delay: -0.16s; }
-        @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1.0); } }
+        #send-button { padding: 0 25px; border: 1px solid var(--primary-red); background-color: var(--primary-red); color: #000; border-radius: 5px; cursor: pointer; font-size: 16px; font-family: 'Fira Code', monospace; font-weight: 700; transition: all 0.2s ease-in-out; }
+        #send-button:hover { background-color: var(--background-color); color: var(--primary-red); box-shadow: 0 0 10px var(--glow-color); }
+        #send-button:disabled { background-color: #555; border-color: #555; color: #888; cursor: not-allowed; box-shadow: none; }
 
-        #input-area {
-            display: flex;
-            padding: 15px;
-            border-top: 1px solid var(--border-color);
-            background-color: #101010;
-            gap: 10px;
-        }
-
-        #message-input {
-            flex-grow: 1;
-            padding: 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 5px;
-            background-color: #252525;
-            color: var(--text-color);
-            font-family: 'Fira Code', monospace;
-            font-size: 1rem;
-            resize: none;
-            overflow-y: hidden;
-        }
-        #message-input:focus {
-            outline: none;
-            border-color: var(--primary-red);
-            box-shadow: 0 0 8px var(--glow-color);
-        }
-        #message-input:disabled {
-            background-color: #333;
-            cursor: not-allowed;
+        #scroll-down-button {
+            position: absolute; bottom: 85px; right: 20px;
+            width: 40px; height: 40px; border-radius: 50%;
+            background-color: var(--primary-red); color: black;
+            border: none; font-size: 24px; cursor: pointer;
+            display: none; justify-content: center; align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
         }
         
-        #input-helper {
-            font-size: 0.8em;
-            color: #888;
-            margin-top: -10px;
-            padding: 0 15px 5px;
-            text-align: left;
-        }
-
-        #send-button {
-            padding: 0 25px;
-            border: 1px solid var(--primary-red);
-            background-color: var(--primary-red);
-            color: #000;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            font-family: 'Fira Code', monospace;
-            font-weight: 700;
-            transition: all 0.2s ease-in-out;
-        }
-        #send-button:hover {
-            background-color: var(--background-color);
-            color: var(--primary-red);
-            box-shadow: 0 0 10px var(--glow-color);
-        }
-        #send-button:disabled {
-            background-color: #555;
-            border-color: #555;
-            color: #888;
-            cursor: not-allowed;
-            box-shadow: none;
-        }
-
-        /* --- Responsive Design for Mobile --- */
         @media (max-width: 768px) {
-            #chat-wrapper {
-                width: 100%;
-                height: 100%;
-                max-height: none;
-            }
-            #title {
-                display: none; /* Hide title on small screens to save space */
-            }
-            #chat-container {
-                height: 100%;
-                border-radius: 0;
-                border: none;
-            }
-            #chat-box {
-                padding: 10px;
-            }
-            .message {
-                max-width: 95%;
-            }
-            #input-area {
-                padding: 10px;
-            }
-            #input-helper {
-                padding: 0 10px 5px;
-            }
+            #chat-wrapper { width: 100%; height: 100%; max-height: none; }
+            .chat-header { margin-bottom: 10px; padding: 0 10px; }
+            #title { font-size: 1.8em; }
+            #chat-container { height: calc(100% - 50px); border-radius: 0; border: none; }
+            #chat-box { padding: 10px; }
+            .message { max-width: 95%; }
+            #input-area { padding: 10px; }
+            #input-helper { padding: 0 10px 5px; }
         }
     </style>
 </head>
 <body>
 
 <div id="chat-wrapper">
-    <h1 id="title">&lt;WormGPT/&gt;</h1>
+    <div class="chat-header">
+        <h1 id="title">&lt;WormGPT/&gt;</h1>
+        <button id="clear-button" title="مسح المحادثة">🗑️</button>
+    </div>
     <div id="chat-container">
-        <div id="chat-box">
-             <div class="message assistant-message">النظام متصل. أرسل رسالة للبدء.</div>
-        </div>
+        <div id="chat-box"></div>
+        <button id="scroll-down-button" title="النزول لأسفل">&#8681;</button>
         <div id="input-area">
             <textarea id="message-input" placeholder="اكتب الأمر هنا..." rows="1"></textarea>
             <button id="send-button">إرسال</button>
@@ -266,133 +167,177 @@
 </div>
 
 <script>
-    const url = 'https://vpvsmziowqjegmbkvhti.supabase.co/functions/v1/chat';
-    const token = "wgpt_611854ec779d6ee0c30956962bf2e0aaf1ecaf9de6d840e1974618390b6cca53";
+    // ================== CONFIGURATION ==================
+    const CONFIG = {
+        API_URL: "https://ewhmkyfjgobpbojquebw.supabase.co/functions/v1/chat",
+        API_KEY: "wgpt_b394057bf6a8aec0d01f82de82c0e88e0a47d5b45f83984c5af1c0b0ed469773",
+        WELCOME_MESSAGE: "النظام متصل وجاهز. كيف يمكنني مساعدتك اليوم؟",
+        MAX_HISTORY_MESSAGES: 20 // يحتفظ بآخر 20 رسالة في السياق
+    };
+    // =================================================
 
-    let messages = [];
-    let isApiActive = true; // --- New variable to track API status
+    const DOM = {
+        chatBox: document.getElementById('chat-box'),
+        messageInput: document.getElementById('message-input'),
+        sendButton: document.getElementById('send-button'),
+        clearButton: document.getElementById('clear-button'),
+        scrollDownButton: document.getElementById('scroll-down-button')
+    };
 
-    const chatBox = document.getElementById('chat-box');
-    const messageInput = document.getElementById('message-input');
-    const sendButton = document.getElementById('send-button');
-    const inputHelper = document.getElementById('input-helper');
+    let conversation = [];
+    let isApiActive = true; 
 
-    messageInput.addEventListener('input', function() {
-        this.style.height = 'auto';
-        this.style.height = (this.scrollHeight) + 'px';
-    });
-    
-    function addCopyButton(messageElement) {
-        const button = document.createElement('button');
-        button.className = 'copy-button';
-        button.textContent = 'نسخ';
-        button.onclick = () => {
-            const textToCopy = messageElement.innerText.replace('نسخ\n', '').replace('تم النسخ!\n', '');
-            navigator.clipboard.writeText(textToCopy).then(() => {
-                button.textContent = 'تم النسخ!';
-                setTimeout(() => { button.textContent = 'نسخ'; }, 2000);
-            });
-        };
-        messageElement.appendChild(button);
+    function init() {
+        DOM.sendButton.addEventListener('click', sendMessage);
+        DOM.clearButton.addEventListener('click', clearConversation);
+        DOM.scrollDownButton.addEventListener('click', () => scrollToBottom(true));
+        DOM.messageInput.addEventListener('keydown', handleKeydown);
+        DOM.messageInput.addEventListener('input', autoResizeTextarea);
+        DOM.chatBox.addEventListener('scroll', toggleScrollDownButton);
+        addWelcomeMessage();
+    }
+
+    function addWelcomeMessage() {
+        addMessage('assistant', CONFIG.WELCOME_MESSAGE);
     }
     
     function addMessage(role, content) {
         const messageDiv = document.createElement('div');
         messageDiv.classList.add('message', `${role}-message`);
-        
-        if (role === 'user') {
-            messageDiv.textContent = content;
-        } else {
-            messageDiv.innerHTML = marked.parse(content);
-            if(role === 'assistant') { // Only add copy button to AI responses
-                addCopyButton(messageDiv);
-            }
-            messageDiv.querySelectorAll('pre code').forEach((block) => {
-                hljs.highlightElement(block);
-            });
-        }
-        
-        chatBox.appendChild(messageDiv);
-        chatBox.scrollTop = chatBox.scrollHeight;
+        messageDiv.innerHTML = marked.parse(content);
+        DOM.chatBox.appendChild(messageDiv);
+        scrollToBottom();
         return messageDiv;
     }
 
-    function showLoadingIndicator() {
-        const loadingDiv = addMessage('assistant', '');
-        loadingDiv.id = 'loading-indicator';
-        loadingDiv.innerHTML = `<div class="loading-dots"><span></span><span></span><span></span></div>`;
-    }
-    
-    function removeLoadingIndicator() {
-        const indicator = document.getElementById('loading-indicator');
-        if (indicator) indicator.remove();
+    function clearConversation() {
+        conversation = [];
+        DOM.chatBox.innerHTML = '';
+        addWelcomeMessage();
     }
 
-    // --- New Function to Disable the Interface ---
-    function disableInterface(message) {
-        isApiActive = false;
-        messageInput.disabled = true;
-        sendButton.disabled = true;
-        messageInput.placeholder = "تم تعطيل الإدخال";
-        inputHelper.style.display = 'none';
-        addMessage('system', message); // Use 'system' role for alerts
+    function addCodeCopyButtons(messageElement) {
+        const codeBlocks = messageElement.querySelectorAll('pre');
+        codeBlocks.forEach(block => {
+            const button = document.createElement('button');
+            button.className = 'copy-code-button';
+            button.textContent = 'نسخ الكود';
+            button.onclick = () => {
+                const code = block.querySelector('code').innerText;
+                navigator.clipboard.writeText(code).then(() => {
+                    button.textContent = 'تم النسخ!';
+                    setTimeout(() => { button.textContent = 'نسخ الكود'; }, 2000);
+                });
+            };
+            block.appendChild(button);
+        });
     }
-    
+
     async function sendMessage() {
-        if (!isApiActive) return; // Stop if API is marked as inactive
+        if (!isApiActive || DOM.sendButton.disabled) return;
 
-        const userInput = messageInput.value.trim();
+        const userInput = DOM.messageInput.value.trim();
         if (userInput === '') return;
 
         addMessage('user', userInput);
-        messages.push({ role: 'user', content: userInput });
+        conversation.push({ role: 'user', content: userInput });
+        if (conversation.length > CONFIG.MAX_HISTORY_MESSAGES) {
+            conversation = conversation.slice(-CONFIG.MAX_HISTORY_MESSAGES);
+        }
         
-        messageInput.value = '';
-        messageInput.style.height = 'auto';
+        DOM.messageInput.value = '';
+        autoResizeTextarea();
+        DOM.sendButton.disabled = true;
 
-        showLoadingIndicator();
-
+        let full_text = "";
+        const assistantMessageDiv = addMessage('assistant', '<span class="blinking-cursor"></span>');
+        
         try {
-            const response = await fetch(url, {
+            const response = await fetch(CONFIG.API_URL, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ token, messages })
+                headers: { 'x-api-key': CONFIG.API_KEY, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ messages: conversation })
             });
 
-            removeLoadingIndicator();
+            if (!response.ok) throw new Error((await response.json()).error || `HTTP ${response.status}`);
 
-            // --- Enhanced Error Handling ---
-            if (!response.ok) {
-                if (response.status === 401 || response.status === 403) {
-                    disableInterface("تم إيقاف الاتصال: الرمز (token) غير صالح أو منتهي الصلاحية.");
-                } else if (response.status >= 500) {
-                    disableInterface("تم إيقاف الاتصال: خطأ في الخادم.");
-                } else {
-                    throw new Error(`خطأ في الشبكة: ${response.statusText} (${response.status})`);
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                const chunkText = decoder.decode(value);
+                const lines = chunkText.split('\n').filter(line => line.trim() !== '');
+
+                for (const line of lines) {
+                    let lineData = line.startsWith('data: ') ? line.substring(6) : line;
+                    if (lineData === '[DONE]') break;
+                    try {
+                        const chunk = JSON.parse(lineData);
+                        const content = chunk.choices?.[0]?.delta?.content || '';
+                        if (content) {
+                            full_text += content;
+                            assistantMessageDiv.innerHTML = marked.parse(full_text + '<span class="blinking-cursor"></span>');
+                            scrollToBottom();
+                        }
+                    } catch (e) {}
                 }
-                return; // Stop further processing
             }
-
-            const data = await response.json();
-            const reply = data.reply || '...استجابة فارغة من النظام';
             
-            addMessage('assistant', reply);
-            messages.push({ role: 'assistant', content: reply });
+            assistantMessageDiv.innerHTML = marked.parse(full_text);
+            addCodeCopyButtons(assistantMessageDiv);
+            assistantMessageDiv.querySelectorAll('pre code').forEach(hljs.highlightElement);
+            conversation.push({ role: 'assistant', content: full_text });
 
         } catch (error) {
-            console.error('Error:', error);
-            removeLoadingIndicator();
-            addMessage('system', `// ERROR\nفشل الاتصال بالخادم. تحقق من اتصالك بالشبكة.\n${error.message}`);
+            assistantMessageDiv.remove();
+            addMessage('system', `// ERROR\nحدث خطأ في الاتصال: ${error.message}`);
+        } finally {
+            DOM.sendButton.disabled = false;
+            DOM.messageInput.focus();
         }
     }
-
-    sendButton.addEventListener('click', sendMessage);
-    messageInput.addEventListener('keydown', function(e) {
+    
+    // --- UTILITY FUNCTIONS ---
+    function handleKeydown(e) {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             sendMessage();
         }
-    });
+    }
+    
+    function autoResizeTextarea() {
+        DOM.messageInput.style.height = 'auto';
+        DOM.messageInput.style.height = (DOM.messageInput.scrollHeight) + 'px';
+    }
+
+    function scrollToBottom(force = false) {
+        const isScrolledToBottom = DOM.chatBox.scrollHeight - DOM.chatBox.clientHeight <= DOM.chatBox.scrollTop + 10;
+        if (force || isScrolledToBottom) {
+            DOM.chatBox.scrollTop = DOM.chatBox.scrollHeight;
+        }
+    }
+
+    function toggleScrollDownButton() {
+        if (DOM.chatBox.scrollHeight - DOM.chatBox.clientHeight > DOM.chatBox.scrollTop + 100) {
+            DOM.scrollDownButton.style.display = 'flex';
+        } else {
+            DOM.scrollDownButton.style.display = 'none';
+        }
+    }
+
+    // Add blinking cursor style dynamically
+    const style = document.createElement('style');
+    style.innerHTML = `
+        .blinking-cursor { display: inline-block; width: 8px; height: 1.2em; background-color: var(--text-color); animation: blink 1s step-end infinite; margin-right: 5px; }
+        @keyframes blink { from, to { background-color: transparent } 50% { background-color: var(--text-color); } }
+    `;
+    document.head.appendChild(style);
+
+    // Start the application
+    init();
 </script>
 
 </body>
