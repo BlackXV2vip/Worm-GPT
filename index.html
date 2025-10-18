@@ -98,18 +98,14 @@
         .assistant-message, .system-message { background-color: #222; color: var(--text-color); align-self: flex-start; border-left: 3px solid var(--primary-red); text-align: right; }
         .system-message { border-color: #f39c12; color: #f39c12; font-weight: bold; }
 
-        .copy-button, .copy-code-button {
-            position: absolute;
+        .copy-code-button {
+            position: absolute; top: 8px; left: 8px;
             background: #444; border: 1px solid #666; color: #eee;
             padding: 4px 8px; border-radius: 5px; cursor: pointer;
             opacity: 0; transition: opacity 0.2s; font-size: 12px;
         }
-        .copy-button { top: 8px; left: 8px; }
-        .assistant-message:hover .copy-button { opacity: 1; }
-        .copy-button:hover { background: #555; }
         
         .assistant-message pre { position: relative; }
-        .copy-code-button { top: 8px; left: 8px; }
         .assistant-message pre:hover .copy-code-button { opacity: 1; }
         
         .assistant-message pre { background-color: #0f0f0f; border: 1px solid var(--border-color); border-radius: 5px; padding: 15px; overflow-x: auto; text-align: left; direction: ltr; }
@@ -167,14 +163,13 @@
 </div>
 
 <script>
-    // ================== CONFIGURATION ==================
+    // ================== CONFIGURATION (تم التحديث) ==================
     const CONFIG = {
-        API_URL: "https://pwjarprthweyludbohnj.supabase.co/functions/v1/wormgpt-chat",
-        API_KEY: "wgpt_b8pty8whhmgw5hojw",
-        WELCOME_MESSAGE: "النظام متصل وجاهز. كيف يمكنني مساعدتك اليوم؟",
-        MAX_HISTORY_MESSAGES: 20 // يحتفظ بآخر 20 رسالة في السياق
+        API_URL: "https://yojagahyhoogwtfpvtok.supabase.co/functions/v1/chat",
+        API_KEY: "wgpt_j4s3c63v8l929lgwxienua",
+        WELCOME_MESSAGE: "النظام متصل وجاهز. كيف يمكنني مساعدتك اليوم؟"
     };
-    // =================================================
+    // =============================================================
 
     const DOM = {
         chatBox: document.getElementById('chat-box'),
@@ -183,9 +178,6 @@
         clearButton: document.getElementById('clear-button'),
         scrollDownButton: document.getElementById('scroll-down-button')
     };
-
-    let conversation = [];
-    let isApiActive = true; 
 
     function init() {
         DOM.sendButton.addEventListener('click', sendMessage);
@@ -204,14 +196,20 @@
     function addMessage(role, content) {
         const messageDiv = document.createElement('div');
         messageDiv.classList.add('message', `${role}-message`);
+        // استخدام marked.parse لتحويل الماركداون إلى HTML
         messageDiv.innerHTML = marked.parse(content);
         DOM.chatBox.appendChild(messageDiv);
         scrollToBottom();
+
+        // تفعيل تمييز الأكواد البرمجية بعد إضافة الرسالة
+        if (role === 'assistant') {
+            addCodeCopyButtons(messageDiv);
+            messageDiv.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
+        }
         return messageDiv;
     }
 
     function clearConversation() {
-        conversation = [];
         DOM.chatBox.innerHTML = '';
         addWelcomeMessage();
     }
@@ -233,70 +231,60 @@
         });
     }
 
+    // ================== دالة الإرسال (تم تحديثها بالكامل) ==================
     async function sendMessage() {
-        if (!isApiActive || DOM.sendButton.disabled) return;
+        if (DOM.sendButton.disabled) return;
 
         const userInput = DOM.messageInput.value.trim();
         if (userInput === '') return;
 
         addMessage('user', userInput);
-        conversation.push({ role: 'user', content: userInput });
-        if (conversation.length > CONFIG.MAX_HISTORY_MESSAGES) {
-            conversation = conversation.slice(-CONFIG.MAX_HISTORY_MESSAGES);
-        }
         
         DOM.messageInput.value = '';
         autoResizeTextarea();
         DOM.sendButton.disabled = true;
+        DOM.messageInput.disabled = true;
 
-        let full_text = "";
-        const assistantMessageDiv = addMessage('assistant', '<span class="blinking-cursor"></span>');
+        const loadingMessage = addMessage('assistant', '<span class="blinking-cursor"></span>');
         
         try {
+            // تجهيز البيانات بنفس طريقة سكريبت البايثون
+            const payload = {
+                "api_key": CONFIG.API_KEY,
+                "message": `يرجى الرد باللغة العربية فقط: ${userInput}`
+            };
+
             const response = await fetch(CONFIG.API_URL, {
                 method: 'POST',
-                headers: { 'x-api-key': CONFIG.API_KEY, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ messages: conversation })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
             });
 
-            if (!response.ok) throw new Error((await response.json()).error || `HTTP ${response.status}`);
-
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
-
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-
-                const chunkText = decoder.decode(value);
-                const lines = chunkText.split('\n').filter(line => line.trim() !== '');
-
-                for (const line of lines) {
-                    let lineData = line.startsWith('data: ') ? line.substring(6) : line;
-                    if (lineData === '[DONE]') break;
-                    try {
-                        const chunk = JSON.parse(lineData);
-                        const content = chunk.choices?.[0]?.delta?.content || '';
-                        if (content) {
-                            full_text += content;
-                            assistantMessageDiv.innerHTML = marked.parse(full_text + '<span class="blinking-cursor"></span>');
-                            scrollToBottom();
-                        }
-                    } catch (e) {}
-                }
+            if (!response.ok) {
+                // محاولة قراءة الخطأ من الرد
+                const errorData = await response.json().catch(() => null);
+                const errorMessage = errorData?.error || `فشل الطلب. كود الحالة: ${response.status}`;
+                throw new Error(errorMessage);
             }
-            
-            assistantMessageDiv.innerHTML = marked.parse(full_text);
-            addCodeCopyButtons(assistantMessageDiv);
-            assistantMessageDiv.querySelectorAll('pre code').forEach(hljs.highlightElement);
-            conversation.push({ role: 'assistant', content: full_text });
+
+            const result = await response.json();
+            const botReply = result.response || 'لم يتم العثور على رد.';
+
+            // تحديث رسالة التحميل بالرد الفعلي
+            loadingMessage.innerHTML = marked.parse(botReply);
+            addCodeCopyButtons(loadingMessage);
+            loadingMessage.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
 
         } catch (error) {
-            assistantMessageDiv.remove();
+            // إزالة رسالة التحميل وعرض رسالة خطأ
+            loadingMessage.remove();
             addMessage('system', `// ERROR\nحدث خطأ في الاتصال: ${error.message}`);
         } finally {
+            // إعادة تفعيل حقل الإدخال والزر
             DOM.sendButton.disabled = false;
+            DOM.messageInput.disabled = false;
             DOM.messageInput.focus();
+            scrollToBottom(true);
         }
     }
     
@@ -310,11 +298,13 @@
     
     function autoResizeTextarea() {
         DOM.messageInput.style.height = 'auto';
-        DOM.messageInput.style.height = (DOM.messageInput.scrollHeight) + 'px';
+        const scrollHeight = DOM.messageInput.scrollHeight;
+        // تحديد أقصى ارتفاع بـ 200 بكسل
+        DOM.messageInput.style.height = Math.min(scrollHeight, 200) + 'px';
     }
 
     function scrollToBottom(force = false) {
-        const isScrolledToBottom = DOM.chatBox.scrollHeight - DOM.chatBox.clientHeight <= DOM.chatBox.scrollTop + 10;
+        const isScrolledToBottom = DOM.chatBox.scrollHeight - DOM.chatBox.clientHeight <= DOM.chatBox.scrollTop + 20;
         if (force || isScrolledToBottom) {
             DOM.chatBox.scrollTop = DOM.chatBox.scrollHeight;
         }
@@ -341,4 +331,4 @@
 </script>
 
 </body>
-    </html>
+</html>
