@@ -661,14 +661,36 @@
 </div>
 
 <!-- ====== واجهة المحادثة (مخفيّة حتى يتم تسجيل الدخول) ====== -->
-<div id="chat-wrapper"></div>
+<div id="chat-wrapper" style="display: none;">
+    <div class="chat-header">
+        <h1 id="title">&lt;WormGPT ⚡/&gt;</h1>
+        <div class="header-buttons">
+            <span id="welcome-user" class="header-button" style="border-color: transparent; cursor: default;"></span>
+            <button id="new-chat-button" class="header-button" title="محادثة جديدة"><i class="fas fa-plus"></i> <span>جديد</span></button>
+            <button id="del-chat-button" class="header-button" title="حذف المحادثة"><i class="fas fa-trash"></i> <span>حذف</span></button>
+            <button id="logout-button" class="header-button" title="تسجيل الخروج"><i class="fas fa-sign-out-alt"></i> <span>خروج</span></button>
+            <button id="clear-button" class="header-button" title="مسح المحادثة"><i class="fas fa-eraser"></i> <span>مسح</span></button>
+        </div>
+    </div>
+    <div id="chat-container">
+        <div id="chat-box"></div>
+        <div id="input-area">
+            <textarea id="message-input" placeholder="اكتب الأمر هنا..." rows="1"></textarea>
+            <button id="send-button"><i class="fas fa-paper-plane"></i></button>
+        </div>
+        <div id="bottom-bar">
+            <span id="message-counter"></span>
+            <a href="#" id="info-button" style="color: #888; text-decoration: none;">معلومات</a>
+        </div>
+    </div>
+</div>
 
 <!-- نافذة OTP عبر تيليجرام (تستخدم الآن للتسجيل أو الدخول) -->
 <div id="login-modal" class="modal">
     <div class="modal-content">
         <div id="step1-telegram-id">
-            <h2 id="modal-title"><i class="fas fa-lock"></i> مصادقة آمنة</h2> <!-- سيتم تحديث العنوان -->
-            <p id="modal-instruction">أدخِل معرّف تيليجرام الخاص بك. سنرسل لك رمز تحقّق عبر البوت <a href="https://t.me/WormGPTOTPbot" target="_blank" style="color: var(--primary-red);">@WormGPTOTPbot</a>.</p> <!-- سيتم تحديث النص -->
+            <h2 id="modal-title"><i class="fas fa-lock"></i> مصادقة آمنة</h2>
+            <p id="modal-instruction">أدخِل معرّف تيليجرام الخاص بك. سنرسل لك رمز تحقّق عبر البوت <a href="https://t.me/WormGPTOTPbot" target="_blank" style="color: var(--primary-red);">@WormGPTOTPbot</a>.</p>
             <input type="text" id="telegram-id-input" class="modal-input" placeholder="Telegram ID">
             <button id="send-code-button" class="modal-button">إرسال الرمز</button>
         </div>
@@ -676,7 +698,7 @@
             <h2><i class="fas fa-key"></i> أدخِل الرمز</h2>
             <p>لقد أرسلنا رمزًا إلى حسابك في تيليجرام. تنتهي صلاحيته بعد 5 دقائق.</p>
             <input type="text" id="code-input" class="modal-input" placeholder="_ _ _ _ _ _" maxlength="6" inputmode="numeric">
-            <button id="verify-code-button" class="modal-button">التحقّق وإنهاء التسجيل</button> <!-- تم تغيير النص -->
+            <button id="verify-code-button" class="modal-button">التحقّق وإنهاء التسجيل</button>
             <a href="#" id="back-to-step1" style="display: block; margin-top: 15px; color: #888;">العودة</a>
         </div>
         <p id="login-status" style="color: var(--system-yellow); margin-top: 15px; height: 20px;"></p>
@@ -697,7 +719,7 @@
 
 <script>
     /********************************************************************
-     *  تم تحديث منطق التسجيل لإضافة التحقق عبر تيليجرام، وتم تحسين التنظيم.
+     *  تم تحديث منطق المصادقة بالكامل. الدخول أصبح مباشراً، التسجيل يتطلب OTP.
      ********************************************************************/
     const CONFIG = {
         API_URL: "https://yojagahyhoogwtfpvtok.supabase.co/functions/v1/chat",
@@ -710,7 +732,7 @@
 
     const DOM = {};
     let conversationHistory = [];
-    let currentUser = null;   // {username, tgId, isAdmin}
+    let currentUser = null;   // {username, tgId, isAdmin, isTemp}
     let registrationData = null; // لتخزين بيانات التسجيل المؤقتة
     let activeSessionId = null;
     let isProcessing = false;
@@ -737,7 +759,18 @@
             showRegister: document.getElementById('show-register'),
             loginModal: document.getElementById('login-modal'),
             infoModal: document.getElementById('info-modal'),
-            toastContainer: document.getElementById('toast-container')
+            toastContainer: document.getElementById('toast-container'),
+            chatWrapper: document.getElementById('chat-wrapper'),
+            chatBox: document.getElementById('chat-box'),
+            messageInput: document.getElementById('message-input'),
+            sendButton: document.getElementById('send-button'),
+            clearButton: document.getElementById('clear-button'),
+            logoutButton: document.getElementById('logout-button'),
+            welcomeUser: document.getElementById('welcome-user'),
+            messageCounter: document.getElementById('message-counter'),
+            infoButton: document.getElementById('info-button'),
+            newChatButton: document.getElementById('new-chat-button'),
+            delChatButton: document.getElementById('del-chat-button')
         });
 
         DOM.showLogin.addEventListener('click', () => toggleAuthForms('login'));
@@ -767,12 +800,23 @@
             if (DOM.step1.dataset.mode === 'register') {
                 setupRegistrationModal();
             } else {
+                // For login flow, revert to step 1 without clearing the ID if coming from step 2
                 DOM.telegramIdInput.value = currentUser ? currentUser.tgId : '';
             }
         });
 
         // Info modal
         DOM.infoModal.querySelector('.close-modal').addEventListener('click', () => DOM.infoModal.classList.remove('active'));
+
+        // Chat interface listeners
+        DOM.sendButton.addEventListener('click', sendMessage);
+        DOM.clearButton.addEventListener('click', clearConversation);
+        DOM.logoutButton.addEventListener('click', logout);
+        DOM.messageInput.addEventListener('keydown', handleKeydown);
+        DOM.messageInput.addEventListener('input', autoResizeTextarea);
+        DOM.infoButton.addEventListener('click', () => DOM.infoModal.classList.add('active'));
+        DOM.newChatButton.addEventListener('click', newConversation);
+        DOM.delChatButton.addEventListener('click', deleteConversation);
 
         // Check if already logged-in
         checkSession();
@@ -806,9 +850,11 @@
             return; 
         }
 
-        // --- START LOGIN OTP ---
-        currentUser = { username: user, tgId: rec.tgId, isAdmin: rec.tgId === CONFIG.ADMIN_ID, isTemp: true };
-        setupLoginModal(rec.tgId); // إعداد النافذة لعملية الدخول
+        // --- DIRECT LOGIN (No OTP required for existing users) ---
+        currentUser = { username: user, tgId: rec.tgId, isAdmin: rec.tgId === CONFIG.ADMIN_ID, isTemp: false };
+        saveSession();
+        showChatInterface();
+        showToast('تم تسجيل الدخول بنجاح!', 'success');
     }
 
     function handleRegister() {
@@ -840,7 +886,7 @@
             return; 
         }
 
-        // حفظ البيانات مؤقتاً
+        // حفظ البيانات مؤقتاً استعداداً للتحقق
         registrationData = { username: user, password: pass, tgId: tg, isAdmin: tg === CONFIG.ADMIN_ID };
         
         // الانتقال إلى خطوة التحقق
@@ -964,14 +1010,13 @@
                 isAdmin: data.id === CONFIG.ADMIN_ID
             };
             saveSession();
-            setTimeout(() => {
-                DOM.loginModal.classList.remove('active');
-                updateMessageCounterUI();
-                DOM.verifyCodeButton.disabled = false;
-                DOM.verifyCodeButton.innerHTML = 'التحقّق والدخول';
-                showToast('تم تسجيل الدخول بنجاح!', 'success');
-                location.reload(); // إعادة تحميل بسيط لضمان تحديث الحالة
-            }, 1000);
+            // إغلاق النافذة والانتقال مباشرة للدردشة
+            DOM.loginModal.classList.remove('active');
+            updateMessageCounterUI();
+            DOM.verifyCodeButton.disabled = false;
+            DOM.verifyCodeButton.innerHTML = 'التحقّق والدخول';
+            showChatInterface();
+            showToast('تم تسجيل الدخول بنجاح!', 'success');
 
         } else if (mode === 'register') {
             // --- COMPLETE REGISTRATION ---
@@ -991,6 +1036,7 @@
             saveSession();
             registrationData = null;
 
+            // إغلاق النافذة والانتقال مباشرة للدردشة
             setTimeout(() => {
                 DOM.loginModal.classList.remove('active');
                 updateMessageCounterUI();
@@ -1007,57 +1053,6 @@
        =                     CHAT INTERFACE BUILD                  =
        ============================================================ */
     function showChatInterface() {
-        // Build UI exactly as before
-        DOM.chatWrapper = document.createElement('div');
-        DOM.chatWrapper.id = 'chat-wrapper';
-        DOM.chatWrapper.innerHTML = `
-            <div class="chat-header">
-                <h1 id="title">&lt;WormGPT ⚡/&gt;</h1>
-                <div class="header-buttons">
-                    <span id="welcome-user" class="header-button" style="border-color: transparent; cursor: default;"></span>
-                    <button id="new-chat-button" class="header-button" title="محادثة جديدة"><i class="fas fa-plus"></i> <span>جديد</span></button>
-                    <button id="del-chat-button" class="header-button" title="حذف المحادثة"><i class="fas fa-trash"></i> <span>حذف</span></button>
-                    <button id="logout-button" class="header-button" title="تسجيل الخروج"><i class="fas fa-sign-out-alt"></i> <span>خروج</span></button>
-                    <button id="clear-button" class="header-button" title="مسح المحادثة"><i class="fas fa-eraser"></i> <span>مسح</span></button>
-                </div>
-            </div>
-            <div id="chat-container">
-                <div id="chat-box"></div>
-                <div id="input-area">
-                    <textarea id="message-input" placeholder="اكتب الأمر هنا..." rows="1"></textarea>
-                    <button id="send-button"><i class="fas fa-paper-plane"></i></button>
-                </div>
-                <div id="bottom-bar">
-                    <span id="message-counter"></span>
-                    <a href="#" id="info-button" style="color: #888; text-decoration: none;">معلومات</a>
-                </div>
-            </div>`;
-        document.body.appendChild(DOM.chatWrapper);
-
-        // Re-assign dynamic elements
-        Object.assign(DOM, {
-            chatBox: document.getElementById('chat-box'),
-            messageInput: document.getElementById('message-input'),
-            sendButton: document.getElementById('send-button'),
-            clearButton: document.getElementById('clear-button'),
-            logoutButton: document.getElementById('logout-button'),
-            welcomeUser: document.getElementById('welcome-user'),
-            messageCounter: document.getElementById('message-counter'),
-            infoButton: document.getElementById('info-button'),
-            newChatButton: document.getElementById('new-chat-button'),
-            delChatButton: document.getElementById('del-chat-button')
-        });
-
-        // Attach listeners
-        DOM.sendButton.addEventListener('click', sendMessage);
-        DOM.clearButton.addEventListener('click', clearConversation);
-        DOM.logoutButton.addEventListener('click', logout);
-        DOM.messageInput.addEventListener('keydown', handleKeydown);
-        DOM.messageInput.addEventListener('input', autoResizeTextarea);
-        DOM.infoButton.addEventListener('click', () => DOM.infoModal.classList.add('active'));
-        DOM.newChatButton.addEventListener('click', newConversation);
-        DOM.delChatButton.addEventListener('click', deleteConversation);
-
         // Hide auth & show chat
         DOM.authWrapper.style.display = 'none';
         DOM.chatWrapper.style.display = 'flex';
@@ -1307,4 +1302,4 @@
     document.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
-            </html>
+    </html>
