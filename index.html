@@ -2,303 +2,1166 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تطبيقنا قيد التطوير</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>⚡ WormGPT - 👿</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Fira+Code:wght@400;700&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Syntax Highlighting (highlight.js) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        /* =================================================================== */
+        /* 1. ROOT & GENERAL STYLES - MOBILE FIRST APPROACH */
+        /* =================================================================== */
+        :root {
+            --primary-red: #e50914;
+            --primary-red-dark: #b20710;
+            --primary-red-hover: #f40612;
+            --background-deep-dark: #0a0a0a;
+            --background-dark: #141414;
+            --container-bg: rgba(20, 20, 20, 0.85);
+            --border-color: rgba(229, 9, 20, 0.25);
+            --text-primary: #ffffff;
+            --text-secondary: #cccccc;
+            --text-info: #f0f0f0;
+            --glow-red: 0 0 20px rgba(229, 9, 20, 0.7);
+            --font-ui-en: 'Poppins', sans-serif;
+            --font-ui-ar: 'Cairo', sans-serif;
+            --font-mono: 'Fira Code', monospace;
+            --gradient-red: linear-gradient(135deg, var(--primary-red), #ff1e56);
+            --gradient-dark: linear-gradient(135deg, #1a1a1a, #0a0a0a);
+        }
+
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            -webkit-font-smoothing: antialiased; 
+            -moz-osx-font-smoothing: grayscale; 
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body { 
+            height: 100%; 
+            overflow: hidden; 
+            font-size: 14px;
+            touch-action: manipulation;
         }
         
         body {
-            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
-            color: #fff;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
+            font-family: var(--font-ui-ar); 
+            color: var(--text-primary);
+            background-color: var(--background-deep-dark);
+            display: flex; 
+            justify-content: center; 
             align-items: center;
+            padding: 0;
+            margin: 0;
+        }
+        
+        #matrix-bg {
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%;
+            z-index: 0;
+        }
+
+        @keyframes fadeIn { 
+            from { 
+                opacity: 0; 
+                transform: translateY(20px) scale(0.98); 
+            } 
+            to { 
+                opacity: 1; 
+                transform: translateY(0) scale(1); 
+            } 
+        }
+
+        @keyframes subtleGlow {
+            0%, 100% { box-shadow: var(--glow-red), 0 8px 32px 0 rgba(0, 0, 0, 0.5); }
+            50% { box-shadow: 0 0 25px rgba(229, 9, 20, 0.9), 0 8px 32px 0 rgba(0, 0, 0, 0.5); }
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { 
+            background: var(--primary-red-dark); 
+            border-radius: 8px; 
+        }
+        ::-webkit-scrollbar-thumb:hover { 
+            background: var(--primary-red-hover); 
+        }
+
+        /* =================================================================== */
+        /* 2. SCREENS & CONTAINERS - MOBILE OPTIMIZED */
+        /* =================================================================== */
+        .screen-container { 
+            width: 100%; 
+            height: 100%; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            padding: 10px; 
+            animation: fadeIn 0.6s ease-out forwards; 
+            z-index: 1; 
+        }
+
+        #auth-wrapper { display: flex; }
+        #chat-wrapper { 
+            display: none; 
+            width: 100%;
+            height: 100%;
+            max-height: 100vh;
+        }
+
+        .content-box {
+            width: 100%; 
+            max-width: 400px; 
+            background: var(--container-bg); 
+            border: 1px solid var(--border-color);
+            border-radius: 12px; 
+            padding: 1.5rem; 
+            box-shadow: var(--glow-red), 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(15px); 
+            -webkit-backdrop-filter: blur(15px);
             text-align: center;
-            padding: 15px;
-            line-height: 1.6;
+            animation: subtleGlow 4s ease-in-out infinite;
+            transition: transform 0.3s ease;
         }
-        
-        .container {
-            width: 100%;
-            max-width: 500px;
-            padding: 30px 20px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            margin: 10px;
+
+        .content-box:hover {
+            transform: translateY(-5px);
         }
-        
-        h1 {
-            font-size: 1.8rem;
-            margin-bottom: 15px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+
+        #chat-container {
+            width: 100%; 
+            height: 100%; 
+            background: var(--container-bg); 
+            border: 1px solid var(--border-color);
+            border-radius: 12px; 
+            box-shadow: var(--glow-red), 0 8px 32px 0 rgba(0, 0, 0, 0.5); 
+            backdrop-filter: blur(15px);
+            display: flex; 
+            flex-direction: column; 
+            overflow: hidden;
+            animation: subtleGlow 4s ease-in-out infinite;
         }
-        
-        p {
+
+        /* =================================================================== */
+        /* 3. UI ELEMENTS & CHAT INTERFACE - MOBILE FRIENDLY */
+        /* =================================================================== */
+        h2 { 
+            font-family: var(--font-mono); 
+            font-size: 1.5rem; 
+            background: var(--gradient-red);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1.5rem; 
+            text-shadow: 0 0 10px rgba(229, 9, 20, 0.3); 
+        }
+
+        .primary-button {
+            width: 100%; 
+            padding: 14px; 
+            margin-top: 1rem; 
+            background: var(--gradient-red); 
+            color: #fff; 
+            border: none;
+            border-radius: 8px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            transition: all 0.3s ease; 
+            text-decoration: none;
+            display: inline-block; 
             font-size: 1rem;
-            margin-bottom: 20px;
-            max-width: 100%;
+            position: relative;
+            overflow: hidden;
+            -webkit-appearance: none;
         }
         
-        .logo {
-            font-size: 3.5rem;
-            margin-bottom: 20px;
-            animation: pulse 2s infinite;
-        }
-        
-        .progress-container {
+        .primary-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
             width: 100%;
-            background-color: rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
-            margin: 25px 0;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .primary-button:hover::before {
+            left: 100%;
+        }
+        
+        .primary-button:hover { 
+            transform: translateY(-3px); 
+            box-shadow: 0 5px 15px rgba(229, 9, 20, 0.4); 
+        }
+        
+        .secondary-button { 
+            background: transparent; 
+            border: 1px solid var(--text-secondary); 
+        }
+        
+        .secondary-button:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .chat-header {
+            padding: 1rem; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            border-bottom: 1px solid var(--border-color); 
+            flex-shrink: 0;
+            background: var(--gradient-dark);
+            min-height: 60px;
+        }
+        
+        /* Glitch Effect */
+        .glitch-wrapper { 
+            position: relative; 
+            flex: 1;
+        }
+        #title {
+            font-family: var(--font-mono); 
+            font-size: 1.3rem; 
+            background: var(--gradient-red);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            position: relative;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        #title::before, #title::after {
+            content: attr(data-text); 
+            position: absolute; 
+            top: 0; 
+            left: 0;
+            width: 100%; 
+            height: 100%; 
+            background: var(--container-bg); 
             overflow: hidden;
         }
-        
-        .progress-bar {
-            height: 18px;
-            background-color: #4CAF50;
-            width: 70%;
-            border-radius: 10px;
-            transition: width 0.5s ease;
-            animation: progress 3s infinite alternate;
+        #title::before { 
+            left: 2px; 
+            text-shadow: -2px 0 var(--primary-red); 
+            clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%); 
+            animation: glitch-anim-1 4s infinite linear alternate-reverse; 
         }
-        
-        .progress-info {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 10px;
+        #title::after { 
+            left: -2px; 
+            text-shadow: -2px 0 #00fff9, 2px 2px var(--primary-red); 
+            clip-path: polygon(0 50%, 100% 50%, 100% 100%, 0 100%); 
+            animation: glitch-anim-2 4s infinite linear alternate-reverse; 
+        }
+        @keyframes glitch-anim-1 { 
+            0%, 100% { clip-path: polygon(0 45%, 100% 45%, 100% 55%, 0 55%); } 
+            50% { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); } 
+        }
+        @keyframes glitch-anim-2 { 
+            0%, 100% { clip-path: polygon(0 60%, 100% 60%, 100% 70%, 0 70%); } 
+            48% { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); } 
+        }
+
+        .header-buttons { 
+            display: flex; 
+            gap: 0.5rem; 
+        }
+        .header-button {
+            background: rgba(255,255,255,0.05); 
+            border: 1px solid var(--text-secondary); 
+            color: var(--text-secondary); 
             font-size: 0.9rem;
+            cursor: pointer; 
+            padding: 0.5rem 0.8rem; 
+            border-radius: 8px; 
+            transition: all 0.3s ease; 
+            display: flex; 
+            align-items: center; 
+            gap: 0.3rem;
+            -webkit-appearance: none;
+        }
+        .header-button:hover { 
+            color: var(--primary-red-hover); 
+            border-color: var(--primary-red-dark); 
+            box-shadow: var(--glow-red); 
+            transform: translateY(-2px); 
+        }
+
+        #chat-box { 
+            flex-grow: 1; 
+            padding: 1rem; 
+            overflow-y: auto; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 0.8rem; 
+            background: rgba(10, 10, 10, 0.3);
+        }
+        .message {
+            position: relative; 
+            padding: 0.8rem 1rem; 
+            border-radius: 16px; 
+            max-width: 90%;
+            line-height: 1.5; 
+            word-wrap: break-word; 
+            font-family: var(--font-ui-ar); 
+            font-size: 0.9rem;
+            animation: fadeInMessage 0.4s ease-out; 
+            white-space: pre-wrap;
+            transition: transform 0.2s ease;
         }
         
-        .social-links {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-top: 25px;
+        .message:hover {
+            transform: scale(1.01);
         }
         
-        .social-link {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 45px;
-            height: 45px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            color: white;
-            font-size: 1.3rem;
-            text-decoration: none;
+        @keyframes fadeInMessage { 
+            from { 
+                opacity: 0; 
+                transform: translateY(10px); 
+            } 
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            } 
+        }
+        
+        .user-message { 
+            background: var(--gradient-red); 
+            color: #fff; 
+            align-self: flex-start; 
+            border-bottom-left-radius: 4px; 
+            box-shadow: 0 4px 15px rgba(229, 9, 20, 0.2); 
+        }
+        html[dir="rtl"] .user-message { 
+            align-self: flex-end; 
+            border-bottom-left-radius: 16px; 
+            border-bottom-right-radius: 4px; 
+        }
+        
+        .assistant-message { 
+            background: #2a2a2e; 
+            border: 1px solid #3c3c42; 
+            align-self: flex-end; 
+            border-bottom-right-radius: 4px; 
+            color: var(--text-info);
+        }
+        html[dir="rtl"] .assistant-message { 
+            align-self: flex-start; 
+            border-bottom-right-radius: 16px; 
+            border-bottom-left-radius: 4px; 
+        }
+
+        /* Typing Indicator */
+        .typing-indicator { 
+            display: flex; 
+            align-items: center; 
+            gap: 5px; 
+            padding: 10px 0; 
+        }
+        .typing-indicator span { 
+            width: 8px; 
+            height: 8px; 
+            background-color: var(--text-secondary); 
+            border-radius: 50%; 
+            animation: typing-bounce 1.4s infinite ease-in-out both; 
+        }
+        .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes typing-bounce { 
+            0%, 80%, 100% { transform: scale(0); } 
+            40% { transform: scale(1.0); } 
+        }
+
+        .system-message { 
+            background: rgba(100, 100, 100, 0.2); 
+            align-self: center; 
+            border: 1px solid #666; 
+            font-size: 0.8rem; 
+            max-width: 95%; 
+            color: var(--text-info);
+        }
+        
+        .copy-answer-btn {
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            background: rgba(0, 0, 0, 0.3);
+            border: none;
+            color: var(--text-secondary);
+            border-radius: 4px;
+            padding: 3px 6px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .message:hover .copy-answer-btn {
+            opacity: 1;
+        }
+        
+        .copy-answer-btn:hover {
+            color: var(--primary-red-hover);
+            background: rgba(0, 0, 0, 0.5);
+        }
+        
+        /* Code Block Styles */
+        .code-block-wrapper { 
+            position: relative; 
+            margin: 0.8rem 0; 
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        pre { 
+            background-color: #1c1d21; 
+            border-radius: 6px; 
+            padding: 1rem 0.8rem 0.8rem 0.8rem; 
+            overflow-x: auto; 
+            font-family: var(--font-mono); 
+            margin: 0;
+            font-size: 0.8rem;
+        }
+        .copy-code-btn { 
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid #444;
+            color: var(--text-secondary);
+            border-radius: 4px;
+            padding: 3px 6px;
+            font-size: 0.7rem;
+            cursor: pointer;
             transition: all 0.3s ease;
         }
         
-        .social-link:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-3px);
+        .copy-code-btn:hover {
+            color: var(--primary-red-hover);
+            border-color: var(--primary-red-dark);
+            background: rgba(0, 0, 0, 0.9);
+        }
+
+        #input-area {
+            display: flex; 
+            padding: 0.8rem; 
+            border-top: 1px solid var(--border-color);
+            background: rgba(10, 10, 10, 0.8); 
+            gap: 0.5rem; 
+            align-items: flex-end; 
+            flex-shrink: 0;
+            min-height: 70px;
+        }
+        #message-input {
+            flex-grow: 1; 
+            padding: 10px 15px; 
+            border: 1px solid #444;
+            border-radius: 20px; 
+            background-color: #2c2c2c; 
+            color: var(--text-primary);
+            font-family: var(--font-mono); 
+            font-size: 0.9rem; 
+            resize: none; 
+            transition: all 0.3s ease;
+            max-height: 120px;
+        }
+        #message-input:focus { 
+            border-color: var(--primary-red); 
+            box-shadow: 0 0 10px rgba(229, 9, 20, 0.5); 
+            outline: none; 
+        }
+        .input-btn {
+            width: 42px; 
+            height: 42px; 
+            border: 1px solid #444; 
+            background-color: #2c2c2c;
+            color: var(--text-secondary); 
+            border-radius: 50%; 
+            cursor: pointer;
+            font-size: 1rem; 
+            transition: all 0.3s ease; 
+            flex-shrink: 0; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            -webkit-appearance: none;
+        }
+        .input-btn:hover { 
+            color: var(--primary-red-hover); 
+            border-color: var(--primary-red-dark); 
+            background-color: #333; 
+            transform: scale(1.1); 
+        }
+        #send-button { 
+            background: var(--gradient-red); 
+            border-color: var(--primary-red-dark); 
+            color: #fff; 
+        }
+        #send-button:hover { 
+            background: var(--primary-red-hover); 
+            border-color: var(--primary-red-hover); 
         }
         
+        @keyframes pulse { 
+            0% { box-shadow: 0 0 0 0 rgba(229, 9, 20, 0.7); } 
+            70% { box-shadow: 0 0 0 10px rgba(229, 9, 20, 0); } 
+            100% { box-shadow: 0 0 0 0 rgba(229, 9, 20, 0); } 
+        }
+        .input-btn.recording { 
+            color: var(--primary-red-hover); 
+            border-color: var(--primary-red-dark); 
+            animation: pulse 1.5s infinite; 
+        }
+        
+        /* Contact Info Styles */
         .contact-info {
-            margin-top: 25px;
-            padding-top: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+            gap: 0.7rem;
+            margin-top: 1.2rem;
+            padding-top: 1.2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            color: var(--text-info);
+            font-size: 0.85rem;
+            transition: color 0.3s ease;
+            justify-content: center;
+        }
+        
+        .contact-item:hover {
+            color: var(--primary-red-hover);
+        }
+        
+        .contact-item a {
+            color: inherit;
+            text-decoration: none;
+        }
+        
+        .contact-item i {
+            width: 18px;
+            text-align: center;
+        }
+        
+        /* Toast Styles */
+        #toast-container { 
+            position: fixed; 
+            bottom: 15px; 
+            z-index: 1001; 
+            width: calc(100% - 30px); 
+            max-width: 350px; 
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .toast {
+            background: var(--container-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px 14px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.4s ease;
             font-size: 0.9rem;
         }
         
-        .contact-info p {
-            margin-bottom: 8px;
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
         }
         
-        .countdown {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin: 20px 0;
+        .toast.error {
+            border-left: 4px solid var(--primary-red);
         }
         
-        .countdown-item {
-            background: rgba(255, 255, 255, 0.15);
-            padding: 10px;
-            border-radius: 10px;
-            min-width: 60px;
+        .toast i {
+            color: var(--primary-red);
         }
-        
-        .countdown-number {
-            font-size: 1.5rem;
-            font-weight: bold;
-            display: block;
-        }
-        
-        .countdown-label {
-            font-size: 0.8rem;
-            margin-top: 5px;
-        }
-        
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-        
-        @keyframes progress {
-            0% { width: 68%; }
-            100% { width: 72%; }
-        }
-        
-        /* تحسينات للشاشات الصغيرة جداً */
-        @media (max-width: 380px) {
-            .container {
-                padding: 20px 15px;
+
+        /* =================================================================== */
+        /* 5. MOBILE OPTIMIZATIONS - ENHANCED */
+        /* =================================================================== */
+        @media (max-width: 768px) {
+            html, body { 
+                font-size: 14px; 
             }
             
-            h1 {
-                font-size: 1.6rem;
+            .screen-container { 
+                padding: 5px; 
             }
             
-            p {
-                font-size: 0.9rem;
+            #chat-wrapper { 
+                height: 100vh;
+                max-height: -webkit-fill-available;
             }
             
-            .logo {
-                font-size: 3rem;
+            #chat-container { 
+                border-radius: 0; 
             }
             
-            .countdown {
-                gap: 5px;
+            .message { 
+                max-width: 95%; 
+                font-size: 0.85rem; 
+                padding: 0.7rem 0.9rem;
             }
             
-            .countdown-item {
-                min-width: 50px;
-                padding: 8px 5px;
+            .content-box { 
+                width: 100%; 
+                padding: 1.2rem;
+                margin: 10px;
             }
             
-            .countdown-number {
-                font-size: 1.3rem;
+            #title { 
+                font-size: 1.1rem; 
             }
             
-            .countdown-label {
-                font-size: 0.7rem;
+            .chat-header {
+                padding: 0.8rem;
             }
             
-            .social-link {
+            .header-button span {
+                display: none;
+            }
+            
+            .header-button {
+                padding: 0.6rem;
+                font-size: 0.8rem;
+            }
+            
+            .contact-info {
+                margin-top: 1rem;
+                padding-top: 1rem;
+            }
+            
+            #chat-box {
+                padding: 0.8rem;
+            }
+            
+            #input-area {
+                padding: 0.6rem;
+            }
+            
+            .input-btn {
                 width: 40px;
                 height: 40px;
-                font-size: 1.1rem;
+                font-size: 0.9rem;
             }
         }
         
-        /* منع التكبير التلقائي على iOS */
-        input, textarea, select {
-            font-size: 16px;
+        @media (max-width: 480px) {
+            html, body { 
+                font-size: 13px; 
+            }
+            
+            .content-box { 
+                padding: 1rem; 
+            }
+            
+            h2 { 
+                font-size: 1.3rem; 
+            }
+            
+            .header-button { 
+                padding: 0.5rem; 
+            }
+            
+            #chat-box { 
+                padding: 0.6rem; 
+            }
+            
+            #input-area { 
+                padding: 0.5rem; 
+                gap: 0.4rem; 
+            }
+            
+            .message {
+                font-size: 0.8rem;
+                padding: 0.6rem 0.8rem;
+            }
+            
+            .contact-item {
+                font-size: 0.8rem;
+            }
         }
+        
+        /* خاصية منع التكبير على iOS */
+        @supports (-webkit-touch-callout: none) {
+            #chat-container {
+                height: -webkit-fill-available;
+            }
+        }
+        
+        /* تحسينات للأجهزة ذات الشاشات الصغيرة جداً */
+        @media (max-height: 600px) {
+            .chat-header {
+                min-height: 50px;
+                padding: 0.6rem;
+            }
+            
+            #title {
+                font-size: 1rem;
+            }
+            
+            #chat-box {
+                padding: 0.5rem;
+            }
+            
+            .message {
+                padding: 0.5rem 0.7rem;
+                margin-bottom: 0.3rem;
+            }
+        }
+        
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="logo">🚀</div>
-        <h1>تطبيقنا قيد التطوير</h1>
-        <p>نعمل حالياً على تحسين تطبيقنا لتقديم تجربة أفضل لك. نحن نعمل بجد لإطلاق النسخة الجديدة قريباً.</p>
-        
-        <div class="progress-container">
-            <div class="progress-bar"></div>
-        </div>
-        
-        <div class="progress-info">
-            <span>نسبة الإنجاز: <strong>70%</strong></span>
-        </div>
-        
-        <p>التاريخ المتوقع للإطلاق:</p>
-        <p><strong>28 أكتوبر 2025 الساعة 7 مساءً</strong></p>
-        
-        <!-- عداد تنازلي -->
-        <div class="countdown">
-            <div class="countdown-item">
-                <span class="countdown-number" id="days">00</span>
-                <span class="countdown-label">أيام</span>
-            </div>
-            <div class="countdown-item">
-                <span class="countdown-number" id="hours">00</span>
-                <span class="countdown-label">ساعات</span>
-            </div>
-            <div class="countdown-item">
-                <span class="countdown-number" id="minutes">00</span>
-                <span class="countdown-label">دقائق</span>
-            </div>
-            <div class="countdown-item">
-                <span class="countdown-number" id="seconds">00</span>
-                <span class="countdown-label">ثواني</span>
-            </div>
-        </div>
-        
-        <div class="social-links">
-            <a href="mailto:blackxv2vip@gmail.com" class="social-link">
-                <i class="fas fa-envelope"></i>
+    
+    <canvas id="matrix-bg"></canvas>
+
+    <!-- شاشة المصادقة -->
+    <div id="auth-wrapper" class="screen-container">
+        <div id="auth-content" class="content-box">
+            <h2><i class="fas fa-skull-crossbones"></i> WormGPT</h2>
+            <p style="color: var(--text-info); margin-bottom: 1.2rem; font-size: 0.9rem;">إصدار Blood Code</p>
+            <a href="https://t.me/blackxv2vip" target="_blank" class="primary-button">
+                <i class="fab fa-telegram"></i> انضم لقناة التليجرام
             </a>
-            <a href="tel:+201097571903" class="social-link">
-                <i class="fas fa-phone"></i>
-            </a>
-            <a href="#" class="social-link">
-                <i class="fab fa-whatsapp"></i>
-            </a>
-            <a href="#" class="social-link">
-                <i class="fab fa-twitter"></i>
-            </a>
-        </div>
-        
-        <div class="contact-info">
-            <p>للتواصل معنا خلال فترة التطوير:</p>
-            <p>البريد الإلكتروني: blackxv2vip@gmail.com</p>
-            <p>هاتف: +201097571903</p>
+            <button id="skip-btn" class="primary-button secondary-button">
+                الدخول للدردشة <i class="fas fa-arrow-left"></i>
+            </button>
+            
+            <!-- معلومات الاتصال -->
+            <div class="contact-info">
+                <div class="contact-item">
+                    <i class="fab fa-telegram"></i>
+                    <a href="https://t.me/blackxv2vip" target="_blank">@BlackXV2VIP</a>
+                </div>
+                <div class="contact-item">
+                    <i class="fas fa-user-secret"></i>
+                    <span>R3X VIP</span>
+                </div>
+                <div class="contact-item">
+                    <i class="fas fa-code"></i>
+                    <span>إصدار Blood Code</span>
+                </div>
+            </div>
         </div>
     </div>
 
+    <!-- شاشة الدردشة -->
+    <main id="chat-wrapper" class="screen-container">
+        <div id="chat-container">
+            <header class="chat-header">
+                <div class="glitch-wrapper">
+                    <h1 id="title" data-text="WormGPT 😈">WormGPT 😈</h1>
+                </div>
+                <div class="header-buttons">
+                    <button id="new-chat-button" class="header-button" title="محادثة جديدة">
+                        <i class="fas fa-sync-alt"></i>
+                        <span>إعادة تعيين</span>
+                    </button>
+                </div>
+            </header>
+            <div id="chat-box"></div>
+            <form id="input-area">
+                <button type="button" id="mic-button" class="input-btn" title="إدخال صوتي" aria-label="إدخال صوتي">
+                    <i class="fas fa-microphone"></i>
+                </button>
+                <textarea id="message-input" placeholder="اكتب رسالتك هنا..." rows="1"></textarea>
+                <button type="submit" id="send-button" class="input-btn" aria-label="إرسال الرسالة">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <div id="toast-container"></div>
+
     <script>
-        // عداد تنازلي
-        function updateCountdown() {
-            const targetDate = new Date('October 28, 2025 19:00:00').getTime();
-            const now = new Date().getTime();
-            const timeLeft = targetDate - now;
+        // IIFE (Immediately Invoked Function Expression)
+        (function() {
+            'use strict';
+
+            // =================================================================== //
+            //                      1. التهيئة والحالة                       //
+            // =================================================================== //
             
-            if (timeLeft < 0) {
-                document.getElementById('days').innerText = '00';
-                document.getElementById('hours').innerText = '00';
-                document.getElementById('minutes').innerText = '00';
-                document.getElementById('seconds').innerText = '00';
-                return;
+            const DEFAULT_CONFIG = {
+                API_URL: "https://qwaiubblstmgedeukckn.supabase.co/functions/v1/wormgpt-chat",
+                API_KEY: "wgpt_iqVUJdfou1tjr454JTtTtwABQzDgtQd5",
+            };
+
+            let CONFIG = { ...DEFAULT_CONFIG };
+            const DOM = {};
+            let isProcessing = false;
+            let isRecording = false;
+            let recognition;
+
+            // =================================================================== //
+            //                      2. التهيئة                            //
+            // =================================================================== //
+
+            document.addEventListener('DOMContentLoaded', () => {
+                
+                // تخزين عناصر DOM (تم حذف info-button و info-modal)
+                const ids = ['html', 'auth-wrapper', 'skip-btn', 'chat-wrapper', 'chat-box', 'input-area', 'message-input', 'send-button', 'new-chat-button', 'mic-button', 'toast-container', 'title', 'matrix-bg'];
+                ids.forEach(id => DOM[id.replace(/-(\w)/g, (m, g) => g.toUpperCase())] = document.getElementById(id) || document.documentElement);
+
+                setupMatrixBackground();
+                loadConfig();
+                setupEventListeners();
+                autoResizeTextarea();
+                
+                // منع التكبير على الهواتف عند النقر المزدوج
+                document.addEventListener('touchstart', function(e) {
+                    if (e.touches.length > 1) {
+                        e.preventDefault();
+                    }
+                }, { passive: false });
+            });
+            
+            // =================================================================== //
+            //                  3. تأثير المصفوفة الخلفية                 //
+            // =================================================================== //
+
+            function setupMatrixBackground() {
+                const canvas = DOM.matrixBg;
+                const ctx = canvas.getContext('2d');
+
+                let w = canvas.width = window.innerWidth;
+                let h = canvas.height = window.innerHeight;
+                let cols = Math.floor(w / 20) + 1;
+                let ypos = Array(cols).fill(0);
+
+                ctx.fillStyle = '#0a0a0a';
+                ctx.fillRect(0, 0, w, h);
+
+                function matrix() {
+                    ctx.fillStyle = 'rgba(10, 10, 10, 0.05)';
+                    ctx.fillRect(0, 0, w, h);
+                    ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--primary-red-dark').trim();
+                    ctx.font = '15pt monospace';
+
+                    ypos.forEach((y, ind) => {
+                        const text = String.fromCharCode(Math.random() * 128);
+                        const x = ind * 20;
+                        ctx.fillText(text, x, y);
+                        if (y > 100 + Math.random() * 10000) ypos[ind] = 0;
+                        else ypos[ind] = y + 20;
+                    });
+                }
+
+                setInterval(matrix, 50);
+
+                window.addEventListener('resize', () => {
+                    w = canvas.width = window.innerWidth;
+                    h = canvas.height = window.innerHeight;
+                    cols = Math.floor(w / 20) + 1;
+                    ypos = Array(cols).fill(0);
+                });
             }
-            
-            const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-            
-            document.getElementById('days').innerText = days.toString().padStart(2, '0');
-            document.getElementById('hours').innerText = hours.toString().padStart(2, '0');
-            document.getElementById('minutes').innerText = minutes.toString().padStart(2, '0');
-            document.getElementById('seconds').innerText = seconds.toString().padStart(2, '0');
-        }
-        
-        // تحديث العداد كل ثانية
-        setInterval(updateCountdown, 1000);
-        updateCountdown(); // التشغيل الأولي
-        
-        // تحسين تجربة اللمس
-        document.querySelectorAll('.social-link').forEach(link => {
-            link.addEventListener('touchstart', function() {
-                this.style.transform = 'translateY(-3px)';
+
+            // =================================================================== //
+            //                      4. إعداد المستمعين للأحداث                           //
+            // =================================================================== //
+
+            function setupEventListeners() {
+                DOM.skipBtn.addEventListener('click', showChatInterface);
+                DOM.inputArea.addEventListener('submit', (e) => { e.preventDefault(); sendMessage(); });
+                DOM.newChatButton.addEventListener('click', clearConversation);
+                DOM.messageInput.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
+                DOM.messageInput.addEventListener('input', autoResizeTextarea);
+                DOM.micButton.addEventListener('click', toggleVoiceRecognition);
+                
+                // تحسينات للهواتف: منع التكبير عند التركيز على الحقول
+                DOM.messageInput.addEventListener('focus', () => {
+                    setTimeout(() => {
+                        document.documentElement.style.zoom = "1";
+                    }, 100);
+                });
+            }
+
+            function autoResizeTextarea() {
+                const textarea = DOM.messageInput;
+                textarea.style.height = 'auto';
+                textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+            }
+
+            function loadConfig() {
+                const savedConfig = localStorage.getItem('wormgpt-config');
+                if (savedConfig) {
+                    try {
+                        CONFIG = { ...CONFIG, ...JSON.parse(savedConfig) };
+                    } catch (e) {
+                        console.error('خطأ في تحميل الإعدادات:', e);
+                    }
+                }
+            }
+
+            // =================================================================== //
+            //                      5. وظائف واجهة المستخدم                              //
+            // =================================================================== //
+
+            function showChatInterface() {
+                DOM.authWrapper.style.display = 'none';
+                DOM.chatWrapper.style.display = 'flex';
+                DOM.messageInput.focus();
+                
+                // إضافة رسالة ترحيب إذا كانت الدردشة فارغة
+                if (DOM.chatBox.children.length === 0) {
+                    addMessage('assistant', "أهلاً بك في WormGPT. أنا نموذج لغوي غير خاضع للرقابة. كيف يمكنني خدمتك اليوم؟");
+                }
+            }
+
+            function clearConversation() {
+                if (DOM.chatBox.children.length > 1 && !confirm("هل أنت متأكد من أنك تريد إعادة تعيين المحادثة؟ سيتم مسح جميع الرسائل.")) return;
+                DOM.chatBox.innerHTML = '';
+                addMessage('assistant', "أهلاً بك في WormGPT. أنا نموذج لغوي غير خاضع للرقابة. كيف يمكنني خدمتك اليوم؟");
+                showToast("تم إعادة تعيين المحادثة");
+            }
+
+            function addMessage(sender, content, isTyping = false) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${sender}-message`;
+                
+                if (isTyping) {
+                    messageDiv.innerHTML = `
+                        <div class="typing-indicator">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    `;
+                } else {
+                    // معالجة المحتوى للكود البرمجي
+                    const processedContent = processCodeBlocks(content);
+                    messageDiv.innerHTML = processedContent;
+                    
+                    // إضافة زر النسخ لرسائل المساعد
+                    if (sender === 'assistant') {
+                        const copyBtn = document.createElement('button');
+                        copyBtn.className = 'copy-answer-btn';
+                        copyBtn.innerHTML = '<i class="fas fa-copy"></i>';
+                        copyBtn.title = 'نسخ الإجابة';
+                        copyBtn.addEventListener('click', () => copyToClipboard(content));
+                        messageDiv.appendChild(copyBtn);
+                    }
+                }
+                
+                DOM.chatBox.appendChild(messageDiv);
+                DOM.chatBox.scrollTop = DOM.chatBox.scrollHeight;
+                return messageDiv;
+            }
+
+            function processCodeBlocks(content) {
+                // اكتشاف وتنسيق الكود البرمجي
+                const codeBlockRegex = /```(\w+)?\n?([\s\S]*?)```/g;
+                return content.replace(codeBlockRegex, (match, lang, code) => {
+                    const language = lang || 'text';
+                    const highlightedCode = hljs.highlightAuto(code.trim()).value;
+                    return `
+                        <div class="code-block-wrapper">
+                            <button class="copy-code-btn" data-code="${encodeURIComponent(code.trim())}">
+                                <i class="fas fa-copy"></i> نسخ الكود
+                            </button>
+                            <pre><code class="hljs ${language}">${highlightedCode}</code></pre>
+                        </div>
+                    `;
+                });
+            }
+
+            function showToast(message, type = 'info') {
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.innerHTML = `
+                    <i class="fas fa-${type === 'error' ? 'exclamation-triangle' : 'check-circle'}"></i>
+                    <span>${message}</span>
+                `;
+                DOM.toastContainer.appendChild(toast);
+                
+                setTimeout(() => toast.classList.add('show'), 10);
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => toast.remove(), 400);
+                }, 3000);
+            }
+
+            // =================================================================== //
+            //                      6. معالجة الرسائل (مصحح)                   //
+            // =================================================================== //
+
+            async function sendMessage() {
+                const message = DOM.messageInput.value.trim();
+                if (!message || isProcessing) return;
+                
+                DOM.messageInput.value = '';
+                autoResizeTextarea();
+                
+                addMessage('user', message);
+                const typingIndicator = addMessage('assistant', '', true);
+                
+                isProcessing = true;
+                DOM.sendButton.disabled = true;
+                DOM.sendButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                
+                try {
+                    // إصلاح مشكلة الاتصال - استخدام payload الصحيح
+                    const payload = {
+                        api_key: CONFIG.API_KEY,
+                        message: message
+                    };
+                    
+                    const response = await fetch(CONFIG.API_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(`خطأ HTTP! الحالة: ${response.status}, الرسالة: ${errorText}`);
+                    }
+                    
+                    const data = await response.json();
+                    typingIndicator.remove();
+                    
+                    if (data.response) {
+                        addMessage('assistant', data.response);
+                    } else if (data.answer) {
+                        addMessage('assistant', data.answer);
+                    } else if (data.error) {
+                        addMessage('assistant', `خطأ: ${data.error}`);
+                    } else {
+                        addMessage('assistant', 'عذراً، لم أستطع معالجة طلبك. يرجى المحاولة مرة أخرى.');
+                    }
+                    
+                } catch (error) {
+                    console.error('Error:', error);
+                    typingIndicator.remove();
+                    
+                    // رسالة خطأ أكثر وضوحاً
+                    let errorMessage = 'عذراً، حدث خطأ في الاتصال. ';
+                    
+                    if (error.message.includes('Failed to fetch')) {
+                        errorMessage += 'يرجى التحقق من اتصال الإنترنت.';
+                    } else if (error.message.includes('404')) {
+                        errorMessage += 'الرابط غير صحيح.';
+                    } else if (error.message.includes('401')) {
+                        errorMessage += 'مفتاح API غير صالح.';
+                    } else {
+                        errorMessage += 'يرجى المحاولة مرة أخرى لاحقاً.';
+                    }
+                    
+                    addMessage('assistant', errorMessage);
+                    showToast('حدث خطأ في الاتصال', 'error');
+                } finally {
+                    isProcessing = false;
+                    DOM.sendButton.disabled = false;
+                    DOM.sendButton.innerHTML = '<i class="fas fa-paper-plane"></i>';
+                }
+            }
+
+            // =================================================================== //
+            //                      7. وظائف مساعدة                          //
+            // =================================================================== //
+
+            function copyToClipboard(text) {
+                navigator.clipboard.writeText(text).then(
+                    () => showToast("تم النسخ إلى الحافظة!"),
+                    () => {
+                        // بديل للمتصفحات القديمة
+                        const textArea = document.createElement('textarea');
+                        textArea.value = text;
+                        document.body.appendChild(textArea);
+                        textArea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textArea);
+                        showToast("تم النسخ إلى الحافظة!");
+                    }
+                );
+            }
+
+            // =================================================================== //
+            //                      8. التعرف على الصوت                          //
+            // =================================================================== //
+
+            function toggleVoiceRecognition() {
+                if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                    showToast("متصفحك لا يدعم ميزة التعرف على الصوت.", 'error');
+                    return;
+                }
+
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = recognition || new SpeechRecognition();
+                
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                recognition.lang = 'ar-SA';
+
+                if (!isRecording) {
+                    recognition.start();
+                    DOM.micButton.classList.add('recording');
+                    isRecording = true;
+                    
+                    recognition.onresult = (event) => {
+                        const transcript = event.results[0][0].transcript;
+                        DOM.messageInput.value = transcript;
+                        autoResizeTextarea();
+                    };
+                    
+                    recognition.onerror = (event) => {
+                        console.error('خطأ في التعرف على الصوت', event.error);
+                        showToast("خطأ في التعرف على الصوت", 'error');
+                        DOM.micButton.classList.remove('recording');
+                        isRecording = false;
+                    };
+                    
+                    recognition.onend = () => {
+                        DOM.micButton.classList.remove('recording');
+                        isRecording = false;
+                    };
+                } else {
+                    recognition.stop();
+                    DOM.micButton.classList.remove('recording');
+                    isRecording = false;
+                }
+            }
+
+            // =================================================================== //
+            //                      9. نسخ الكود البرمجي                         //
+            // =================================================================== //
+
+            document.addEventListener('click', (e) => {
+                if (e.target.closest('.copy-code-btn')) {
+                    const btn = e.target.closest('.copy-code-btn');
+                    const code = decodeURIComponent(btn.getAttribute('data-code'));
+                    copyToClipboard(code);
+                }
             });
-            
-            link.addEventListener('touchend', function() {
-                this.style.transform = 'translateY(0)';
-            });
-        });
+
+        })();
     </script>
 </body>
-</html>
+                                               </html>
